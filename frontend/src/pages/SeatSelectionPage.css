@@ -1,0 +1,66 @@
+.seat {
+  width: 60px;
+  height: 80px;
+  margin: 5px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.seat {
+  transition: transform 0.2s;
+  user-select: none;
+}
+
+.seat:not(.bg-danger):hover {
+  transform: scale(1.05);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.seat-content {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.seat-code {
+  font-size: 1.1rem;
+}
+
+.seat-price {
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.seat-features {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.cabin-section {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.legend {
+  background-color: #fff;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.seats-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
