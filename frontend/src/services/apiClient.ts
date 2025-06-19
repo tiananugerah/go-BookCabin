@@ -13,8 +13,8 @@ class AxiosApiClient implements ApiClient {
       baseURL,
       headers: {
         'Content-Type': 'application/json',
-      }
-      // Hapus withCredentials: true
+      },
+      withCredentials: false  // Aktifkan kembali untuk mendukung CORS dengan credentials
     });
 
     // Request interceptor
@@ -22,14 +22,6 @@ class AxiosApiClient implements ApiClient {
       (config) => {
         const token = localStorage.getItem('token');
         if (token) {
-          // Cek expired token
-          const tokenExpiration = localStorage.getItem('tokenExpiration');
-          if (tokenExpiration && new Date().getTime() > parseInt(tokenExpiration)) {
-            localStorage.removeItem('token');
-            localStorage.removeItem('tokenExpiration');
-            window.location.href = '/login';
-            return Promise.reject('Token expired');
-          }
           config.headers.Authorization = `Bearer ${token}`;
         }
         return config;
@@ -43,10 +35,11 @@ class AxiosApiClient implements ApiClient {
     this.instance.interceptors.response.use(
       (response) => response,
       async (error: AxiosError) => {
-        if (error.response?.status === 401) {
+        if (error.response?.status === 401 || error.response?.status === 307) {
           localStorage.removeItem('token');
           localStorage.removeItem('tokenExpiration');
-          window.location.href = '/login';
+          // Gunakan window.location.replace untuk menghindari masalah history
+          window.location.replace('/login');
           return Promise.reject(error);
         }
         return Promise.reject(error);

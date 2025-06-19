@@ -1,5 +1,5 @@
 import React, { JSX } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
@@ -29,13 +29,28 @@ const Navigation = () => {
 };
 
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {
-  const { isAuthenticated } = useAuth();
-  return isAuthenticated ? children : <Navigate to="/login" replace />;
+  const { isAuthenticated, isLoading } = useAuth();
+  const location = useLocation();
+
+  if (isLoading) {
+    return <div className="d-flex justify-content-center p-5"><div className="spinner-border" role="status"></div></div>;
+  }
+
+  return isAuthenticated ? 
+    children : 
+    <Navigate to="/login" state={{ from: location }} replace />;
 };
 
 const PublicRoute = ({ children }: { children: JSX.Element }) => {
-  const { isAuthenticated } = useAuth();
-  return isAuthenticated ? <Navigate to="/" replace /> : children;
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    return <div className="d-flex justify-content-center p-5"><div className="spinner-border" role="status"></div></div>;
+  }
+
+  return isAuthenticated ? 
+    <Navigate to="/" replace /> : 
+    children;
 };
 
 const AppContent = () => {

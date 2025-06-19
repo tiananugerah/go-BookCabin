@@ -55,7 +55,22 @@ class AuthService {
     const expirationTime = new Date().getTime() + (response.expiresIn * 1000);
     localStorage.setItem('token', response.token);
     localStorage.setItem('tokenExpiration', expirationTime.toString());
+    // Tambahkan flag isAuthenticated
+    localStorage.setItem('isAuthenticated', 'true');
     this.startTokenCheck();
+  }
+
+  isAuthenticated(): boolean {
+    const token = localStorage.getItem('token');
+    const expiration = localStorage.getItem('tokenExpiration');
+    const isAuth = localStorage.getItem('isAuthenticated');
+    if (!token || !expiration || !isAuth) return false;
+    const isValid = new Date().getTime() < parseInt(expiration);
+    if (!isValid) {
+      this.logout(); // Bersihkan data jika token expired
+      return false;
+    }
+    return true;
   }
 
   private startTokenCheck(): void {
@@ -66,13 +81,6 @@ class AuthService {
         window.dispatchEvent(event);
       }
     }, 30000); // Check setiap 30 detik
-  }
-
-  isAuthenticated(): boolean {
-    const token = localStorage.getItem('token');
-    const expiration = localStorage.getItem('tokenExpiration');
-    if (!token || !expiration) return false;
-    return new Date().getTime() < parseInt(expiration);
   }
 
   private handleAuthError(error: any): void {

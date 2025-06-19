@@ -1,31 +1,43 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const LoginPage = () => {
-  const { login } = useAuth();
+  const { login, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/', { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return;
+
     setError('');
     setLoading(true);
 
     try {
       await login(email, password);
-      // Login berhasil akan ditangani oleh AuthContext
     } catch (err: any) {
-      setLoading(false); // Pastikan loading state direset
+      let errorMessage = 'Terjadi kesalahan saat login. Silakan coba lagi.';
+      
       if (err.response?.data?.error) {
-        setError(err.response.data.error);
+        errorMessage = err.response.data.error;
       } else if (err.message) {
-        setError(err.message);
-      } else {
-        setError('Terjadi kesalahan saat login. Silakan coba lagi.');
+        errorMessage = err.message;
       }
+      
+      setError(errorMessage);
       console.error('Login error:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -68,7 +80,7 @@ const LoginPage = () => {
                 )}
                 <button 
                   type="submit" 
-                  className="btn btn-primary w-100" 
+                  className="btn btn-primary w-100 mb-3" 
                   disabled={loading}
                 >
                   {loading ? (
@@ -78,6 +90,18 @@ const LoginPage = () => {
                     </>
                   ) : 'Login'}
                 </button>
+                
+                <div className="text-center">
+                  <p className="mb-0">Belum punya akun?</p>
+                  <button
+                    type="button"
+                    className="btn btn-link"
+                    onClick={() => navigate('/register')}
+                    disabled={loading}
+                  >
+                    Daftar Sekarang
+                  </button>
+                </div>
               </form>
             </div>
           </div>

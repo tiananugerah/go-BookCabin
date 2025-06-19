@@ -20,34 +20,36 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const location = useLocation();
 
   useEffect(() => {
-    const initAuth = async () => {
+    const initAuth = () => {
       try {
         const isAuth = authService.isAuthenticated();
         setIsAuthenticated(isAuth);
-        if (!isAuth && location.pathname !== '/login' && location.pathname !== '/register') {
-          navigate('/login', { state: { from: location }, replace: true });
-        }
-      } finally {
         setIsInitialized(true);
+      } catch (error) {
+        console.error('Error checking auth status:', error);
+        setIsAuthenticated(false);
       }
     };
 
     initAuth();
     const interval = setInterval(initAuth, 60000);
+
     return () => clearInterval(interval);
-  }, [navigate, location]);
+  }, []);
 
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
-      await authService.login({ email, password });
-      setIsAuthenticated(true);
-      // Pastikan kita mendapatkan intended path dengan benar
-      const from = location.state?.from?.pathname || "/";
-      // Tambahkan timeout kecil untuk memastikan state terupdate
-      setTimeout(() => {
+      const response = await authService.login({ email, password });
+      if (response.token) {
+        setIsAuthenticated(true);
+        const from = location.state?.from?.pathname || "/";
+        // Tunggu state terupdate
+        await new Promise(resolve => setTimeout(resolve, 100));
         navigate(from, { replace: true });
-      }, 100);
+      } else {
+        throw new Error('Token tidak ditemukan dalam response');
+      }
     } catch (error) {
       console.error('Login failed:', error);
       setIsAuthenticated(false);
